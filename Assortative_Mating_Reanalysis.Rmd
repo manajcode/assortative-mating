@@ -1,0 +1,238 @@
+---
+title: "Re-Analysis of Najarro et al. 2015"
+author: "Michael Najarro"
+date: "6/21/2020"
+output: pdf_document
+---
+
+#*Introduction*
+
+In 2015, Najarro et al. produced a publication that partially validated the results of Sharon et al. 2010, which demonstrated a non-genetic form of inheritance for sexual preferences mediated throghu diet and gut-microbiota. Najarro partially replciated the results of Sharon et al. but only in a line of inbred fruit flies.
+
+# *Objective*
+
+This report attempts to demonstrate the findings of Najarro in a reproducible and easily interpretable format. 
+The resutls represented are a part of M. Najarro's Masters thesis **The effect of diet treatment on mating preference in Drosophila melanogaster** (Najarro 2015), and the subsequent publication that developed from the thesis, **Choosing mates based on the diet of your ancestors: replication of non-genetic assortative mating in Drosophila melanogaster** (Najarro et al. 2015).
+
+For both document, there were four main objectives:
+
+    1. Validate the assortative mating results of Sharon et al. (2010) by following their experimental protocol.
+    
+    2. Determine if the phenomenon observed by Sharon et al. (2010) was limited to the genotype of the inbred D. melanogaster strain they used.
+    
+    3. Build upon their results by performing alternative mate choice design experiments called three-way mate choice experiments, to test the generality of the assortative mating patterns
+    
+    4. Determine if one sex drove mate preference.
+
+
+
+## Step 1: Load data
+```{r}
+library(pacman)
+p_load(readxl, tidyverse, magrittr)
+```
+
+
+
+```{r}
+fourway <- read.csv("./data/Data_from_4-way_mate_choice.csv", stringsAsFactors = FALSE)
+
+threeway <- read.csv("./data/Data_from_3-way_mate_choice.csv", stringsAsFactors = FALSE)
+```
+
+
+These statistics can be found in Najarro 2015  . Each section will identify the source location of the code.
+
+
+
+## Step 2: assortative info for canton-S columntable 1
+```{r}
+
+###all associative matings
+assortative_matings<-nrow(subset(fourway,fourway[,15]== "assortative"))
+
+####assortative matings for canton-s
+allcantonsassortativematimgs<-nrow(filter(fourway, fourway[,15]== "assortative", fourway[,2]=="Canton-S"))
+
+####cantonscmy assortative matings
+allcmycantonsassortative<-nrow(filter(fourway,fourway[,16]=="CMY", fourway[,17]=="CMY", fourway[,2]=="Canton-S"))
+####cantons starch
+allcantonstarchassortativecantons<-nrow(filter(fourway,fourway[,16]=="Starch", fourway[,17]=="Starch", fourway[,2]=="Canton-S"))
+
+#filter(fourway,fourway[,16]=="CMY", fourway[,17]=="CMY", fourway[,2]=="allRAL")
+#filter(fourway,fourway[,16]=="Starch", fourway[,17]=="Starch", fourway[,2]=="allRAl")
+#filter(fourway, fourway[,15]== "assortative", fourway[,2]=="allRAL")
+numberofcantos<-nrow(filter(fourway, fourway[,2]=="Canton-S"))
+
+```
+
+###step2disassortative cantons code table 1
+```{r}
+#disassortative_matings<-nrow(subset(fourway,fourway[,15]== "disassortative"))
+allcantonsdisassortativematimgs<-nrow(filter(fourway, fourway[,15]== "disassortative", fourway[,2]=="Canton-S"))
+####cantonscmy disassortative matings
+cmycantonsdisassortative<-nrow(filter(fourway,fourway[,16]=="CMY", fourway[,17]=="Starch", fourway[,2]=="Canton-S"))
+####cantons starch disassortative
+cantonstarchdisassortative<-nrow(filter(fourway,fourway[,16]=="Starch", fourway[,17]=="CMY", fourway[,2]=="Canton-S"))
+
+```
+
+### step 3:
+```{r}
+#binom test for assort matings for cantons 
+propassortcantons<-allcantonsassortativematimgs /(allcantonsassortativematimgs+ allcantonsdisassortativematimgs)
+#binom.test(x=allcantonsassortativematimgs, n=344,p=0.5 )
+cantos4waybinom<-binom.test(x=allcantonsassortativematimgs, n=numberofcantos,p=0.5 )
+```
+##step5 : assortative info for all ral column table 1
+```{r}
+numberofallrall<-nrow(filter(fourway, fourway[,2]=="allRAL"))
+
+####assortative matings for all ral
+allralassortativematimgs<-nrow(filter(fourway, fourway[,15]== "assortative", fourway[,2]=="allRAL"))
+
+####cantonscmy assortative matings
+allralcmyassortative<-nrow(filter(fourway,fourway[,16]=="CMY", fourway[,17]=="CMY", fourway[,2]=="allRAL"))
+####cantons starch
+allralstarchassortativecantons<-nrow(filter(fourway,fourway[,16]=="Starch", fourway[,17]=="Starch", fourway[,2]=="allRAL"))
+```
+
+##step6 : disassort info for all ral column table 1
+```{r}
+#disassortative_matings<-nrow(subset(fourway,fourway[,15]== "disassortative"))
+allralldisassortativematimgs<-nrow(filter(fourway,  fourway[,2]=="allRAL", fourway[,15]== "disassortative"))
+####cantonscmy disassortative matings
+allrallcmydisassortative<-nrow(filter(fourway, fourway[,2]=="allRAL",fourway[,16]=="CMY", fourway[,17]== "Starch" ))
+####cantons starch disassortative
+allralstarchdisassortative<-nrow(filter(fourway,fourway[,16]=="Starch", fourway[,17]=="CMY", fourway[,2]=="allRAL"))
+```
+ ## step 7 Binomial for All Rall:
+```{r}
+
+proportionassorttallrall<-allralassortativematimgs/(allralldisassortativematimgs+ allralassortativematimgs)
+h<-allralassortativematimgs+allralldisassortativematimgs
+#binom.test(x=allralassortativematimgs, n=302,p=0.5 )
+allrall4waybinom<-binom.test(x=allralassortativematimgs, n=h,p=0.5 )
+allrall4waybinom[3]
+```
+##Step 8. Oregon-R
+```{r}
+oregonrmatings<-385
+oregonrassortmatings<-236
+oregonrdisassortative<-149
+oregonrstarchxstarch<-109
+oregonrcmyxcmy<-127
+oregonrcmyxstarch<-81
+oregonrstarchxcmy<-68
+propassortoregonr<-oregonrassortmatings/oregonrmatings
+oregon4way<-binom.test(x=oregonrassortmatings , n=oregonrmatings, p=0.5)
+as.numeric(oregon4way[3])
+```
+
+##step9.table1
+```{r}
+table1<-tribble(~CantonS, ~AllRal, ~OregonR ,
+numberofcantos, numberofallrall, oregonrmatings,
+allcantonsassortativematimgs,allralassortativematimgs,oregonrassortmatings,
+allcantonsdisassortativematimgs,allralldisassortativematimgs,oregonrdisassortative,
+propassortcantons,proportionassorttallrall,propassortoregonr,
+as.numeric(cantos4waybinom[3]),as.numeric(allrall4waybinom[3]),as.numeric(oregon4way[3]))
+tableone<-as.matrix(table1)
+rownames(tableone)<-c( "N matings", "assortativ_matings","disassortative_matings","proportion assortative matings","pvalues of assortative matings in binomial test.")
+colnames(tableone)<- c("Cantons", "AllRal","OregonR")
+
+tableone
+
+```
+##step 10. new table 1.5 of assortative matings  matings
+```{r}
+assortative<-tribble(~CantonS, ~AllRal, ~OregonR,
+        allcantonstarchassortativecantons,allralstarchassortativecantons,oregonrstarchxstarch, allcmycantonsassortative,allralcmyassortative,oregonrcmyxcmy)
+as<- as.data.frame(assortative)  
+as
+row.names(as)<-c("starchassortative matings","cmy assortative")      
+as
+```
+
+##step10 new table1.75 of disassortative   matings
+```{r}
+dis<-tribble(~CantonS, ~AllRal, ~OregonR,
+        cantonstarchdisassortative ,allralstarchdisassortative,oregonrdisassortative,
+        cmycantonsdisassortative, allrallcmydisassortative,oregonrcmyxstarch,
+        )
+disa<-as.data.frame(dis)
+rownames(disa)<-c( "disassortativematings with starch rearted females", "disassortative matings with a cmy femalereared")
+colnames(table)<- c("Cantons", "AllRal","OregonR")
+       
+```
+##table2 stats three way statistics
+```{r}
+
+###asassortative matings with male cmy chooser
+MC <-nrow(filter(threeway,threeway[,15]== "assortative", threeway[,2 ]=="Canton s",threeway[,16]=="cmy", threeway[,6]=="MC" ))
+ 
+#####female cmy chooser
+ FC<-nrow(filter(threeway,threeway[,15]== "assortative", threeway[,2 ]=="Canton s", threeway[,6]=="FC" ))
+
+ ####assortative starch matings where the chooser was male and raised on starch
+ ms<-nrow(filter(threeway,threeway[,15]== "assortative", threeway[,2 ]=="Canton s", threeway[,6]=="MS" ))
+ 
+ ####assortative starch matings where the chooser was female raised on starch
+ fs<-nrow(filter(threeway,threeway[,15]== "assortative", threeway[,2 ]=="Canton s", threeway[,6]=="FS" ))
+
+####all assortative matings for three way matings
+#nrow(filter(threeway,threeway[,15]== "assortative", threeway[,2 ]=="Canton s",threeway[,16]=="starch" ))
+
+ 
+
+####chooser is malestarch and outcome is disassortative
+dismsrow<-nrow(filter(threeway,threeway[,15]== "disassortative", threeway[,2 ]=="Canton s",threeway[,6]=="MS"))
+####chooser is female starch and outcome is disassortative
+disfsrow<-nrow(filter(threeway,threeway[,15]== "disassortative", threeway[,2 ]=="Canton s",threeway[,6]=="FS"  ))
+
+####chooser is malestarch and outcome is disassortative
+dismcrow <-nrow(filter(threeway,threeway[,15]== "disassortative", threeway[,2 ]=="Canton s",threeway[,6]=="MC"))
+####chooser is female starch and outcome is disassortative
+disfc<-nrow(filter(threeway,threeway[,15]== "disassortative", threeway[,2 ]=="Canton s",threeway[,6]=="FC"  ))
+```
+#build table 2.
+```{r}
+column1<- c(fs,ms,FC,MC)
+column2<- c(disfsrow,dismsrow, disfc, dismcrow)
+column3<- column1+ column2
+#column4<- c(column1/column3)
+a<-column1[1]
+v<-column3[1]
+test1<-binom.test(x=a, n=v,p=0.5)
+q<- column1[2]
+w<- column3[2]
+test2<-binom.test(x=q, n=w,p=0.5)
+r<- column1[3]
+t<-column3[3]
+test3<- binom.test(x=r, n=t,p=0.5)
+y<-column1[4]
+u<-column3[4]
+test4<- binom.test(x=y,n=u,p=0.5)
+column4<- c(test1[3], test2[3],test4[3])
+table2<-data.frame(column1, column2, column3,column4)
+colnames(table2)<-c("assortative matings","disassortative matings","sum of assortative and disassortative matings for a row"," binomial test for assortative matings,p value ")
+rownames(table2)<- c("female starch chooser",
+                     "male starch chooser",
+                     "female cmy chooser",
+                     "male cmy chooser")
+```
+
+```{r}
+#figure1
+proportionassortativematingsbygenotype<- c( proportionassorttallrall, propassortcantons, propassortoregonr)
+strains<- c("assort all rall","assortative Cantons","Oregon- R")
+pr<-data.frame(proportionassortativematingsbygenotype, strains)
+pr
+ggplot(pr, aes(x=strains, y= proportionassortativematingsbygenotype) )+geom_point()
+```
+```{r}
+##anova models to evalate influence of other variables
+
+```
+
+
